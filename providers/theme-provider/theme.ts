@@ -26,15 +26,12 @@ export class Theme {
     this.colors = colors;
   }
 
-  toNativeWindStyle() {
-    return vars({
-      '--color-background': this.colors.background,
-      '--color-foreground': this.colors.foreground,
-      '--color-primary': this.colors.primary,
-      '--color-secondary': this.colors.secondary,
-      '--color-muted': this.colors.muted,
-      '--color-accent': this.colors.accent,
-    });
+  toNativeWindStyle(): Record<string, string> {
+    let result: Record<string, string> = {};
+    for (const key in this.colors) {
+      result[`--color-${key}`] = this.colors[key as keyof ThemeColors];
+    }
+    return vars(result);
   }
 
   static getThemeByType(type: ThemeType): Theme {
