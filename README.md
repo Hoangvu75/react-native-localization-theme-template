@@ -1,4 +1,4 @@
-# My Expo App
+# Multi-theme & multi-language template React Native app
 
 A React Native application with dynamic theming and multi-language support.
 
