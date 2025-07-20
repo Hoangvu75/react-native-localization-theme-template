@@ -7,12 +7,6 @@ import { routes } from '../utils/routes';
 
 export type Language = 'en' | 'vi' | 'es' | 'fr' | 'de' | 'ja' | 'ko' | 'zh';
 
-// Add translation progress type
-export interface TranslationProgress {
-  targetLanguage: Language;
-  progress: number;
-  step: string;
-}
 
 const baseTranslations = {
   en: {
@@ -173,12 +167,17 @@ const languageNativeNames: Record<Language, string> = {
   zh: '中文'
 };
 
+export interface TranslationProgress {
+  targetLanguage: Language;
+  progress: number;
+  step: string;
+}
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
   tr: (key: keyof typeof baseTranslations.en) => string;
   languages: Record<Language, string>;
-  // Add translation progress state
   translationProgress: TranslationProgress | null;
 }
 

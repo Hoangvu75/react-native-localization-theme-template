@@ -5,7 +5,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useLanguage } from '../providers/language-provider';
 
 export default function TranslatingScreen() {
-  const { tr } = useLanguage();
+  const { tr, translationProgress } = useLanguage();
   const { targetLanguage, languageName } = useLocalSearchParams<{
     targetLanguage: string;
     languageName: string;
@@ -24,29 +24,15 @@ export default function TranslatingScreen() {
   }, [progress, animatedProgress]);
 
   useEffect(() => {
-    const handleTranslationProgress = (event: any) => {
-      if (event.targetLanguage === targetLanguage) {
-        setProgress(event.progress);
-        setCurrentStep(event.step);
-        
-        if (event.progress >= 100) {
-          setTimeout(router.back, 1000);
-        }
+    if (translationProgress && translationProgress.targetLanguage === targetLanguage) {
+      setProgress(translationProgress.progress);
+      setCurrentStep(translationProgress.step);
+      
+      if (translationProgress.progress >= 100) {
+        setTimeout(router.back, 1000);
       }
-    };
-
-    const globalThis = global as any;
-    globalThis.translationProgressListeners = globalThis.translationProgressListeners || [];
-    globalThis.translationProgressListeners.push(handleTranslationProgress);
-
-    return () => {
-      if (globalThis.translationProgressListeners) {
-        globalThis.translationProgressListeners = globalThis.translationProgressListeners.filter(
-          (listener: any) => listener !== handleTranslationProgress
-        );
-      }
-    };
-  }, [targetLanguage]);
+    }
+  }, [translationProgress, targetLanguage]);
 
   const progressWidth = animatedProgress.interpolate({
     inputRange: [0, 100],
