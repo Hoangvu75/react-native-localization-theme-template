@@ -7,8 +7,9 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, Theme } from '../providers/theme-provider';
-import { useLanguage, Language } from '../providers/language-provider';
+import { useTheme } from '../providers/theme-provider/theme-provider';
+import { Theme } from '../providers/theme-provider/theme';
+import { useLanguage } from '../providers/language-provider/language-provider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StorageKeys } from '../utils/storage-keys';
 import ThemeButton from 'components/theme-button';
@@ -65,15 +66,13 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
 
-        <NextStep />
-
         <Text className="text-foreground text-xl font-bold mb-4 mt-6">
           {tr('theme')}:
         </Text>
 
         {
-          Object.keys(themes).map((themeKey) =>
-            <ThemeButton key={themeKey} themeKey={themeKey as Theme} />
+          themes.map((theme) =>
+            <ThemeButton key={theme.type} theme={theme} />
           )
         }
 
@@ -82,37 +81,11 @@ export default function HomeScreen() {
         </Text>
 
         {
-          Object.keys(languages).map((languageKey) =>
-            <LanguageButton key={languageKey} languageKey={languageKey as Language} />
+          languages.map((language) =>
+            <LanguageButton key={language.code} language={language} />
           )
         }
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function NextStep() {
-  const { tr } = useLanguage();
-  const [currentStep, setCurrentStep] = React.useState(0);
-
-  const nextStep = () => {
-    setCurrentStep(prev => prev + 1);
-  };
-
-  return (
-    <View>
-      <Text className="text-muted text-lg mb-4">
-        {tr('currentStep')}: {currentStep}
-      </Text>
-
-      <TouchableOpacity
-        className="bg-primary p-4 rounded-lg mb-4"
-        onPress={nextStep}
-      >
-        <Text className="text-background text-center font-semibold">
-          {tr('nextStep')}
-        </Text>
-      </TouchableOpacity>
-    </View>
   );
 }

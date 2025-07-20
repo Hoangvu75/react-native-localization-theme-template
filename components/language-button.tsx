@@ -1,35 +1,38 @@
-import { Language, useLanguage } from "providers/language-provider";
+import { Language, LanguageCode } from "providers/language-provider/language";
+import {  useLanguage } from "providers/language-provider/language-provider";
+import { Translation } from "providers/language-provider/translation";
 import { Text, TouchableOpacity } from "react-native";
 
 interface LanguageButtonProps {
-  languageKey: Language;
+  language: Language;
 }
 
 export default function LanguageButton(props: LanguageButtonProps) {
-  const { language, setLanguage } = useLanguage();
+  const { language: currentLanguage, setLanguage } = useLanguage();
   const { tr } = useLanguage();
 
-  const languageTranslationMap = {
-    en: 'english' as const,
-    vi: 'vietnamese' as const,
-    es: 'spanish' as const,
-    fr: 'french' as const,
-    de: 'german' as const,
-    ja: 'japanese' as const,
-    ko: 'korean' as const,
-    zh: 'chinese' as const,
-  };
+  const languageTranslationMap: Record<LanguageCode, keyof Translation> = {
+    [LanguageCode.EN]: 'english',
+    [LanguageCode.VI]: 'vietnamese',
+    [LanguageCode.ES]: 'spanish',
+    [LanguageCode.FR]: 'french',
+    [LanguageCode.DE]: 'german',
+    [LanguageCode.JA]: 'japanese',
+    [LanguageCode.KO]: 'korean',
+    [LanguageCode.ZH]: 'chinese',
+  } as const;
 
-  let languageKey = props.languageKey;
+  const { language } = props;
+  const isSelected = currentLanguage.code === language.code;
 
   return (
     <TouchableOpacity
-      key={languageKey}
-      className={`p-4 rounded-lg mb-2 ${language === languageKey ? 'bg-primary' : 'bg-secondary'}`}
-      onPress={() => setLanguage(languageKey as Language)}
+      key={language.code}
+      className={`p-4 rounded-lg mb-2 ${isSelected ? 'bg-primary' : 'bg-secondary'}`}
+      onPress={() => setLanguage(language)}
     >
-      <Text className={`text-center ${language === languageKey ? 'text-background font-bold' : 'text-foreground'}`}>
-        {tr(languageTranslationMap[languageKey as keyof typeof languageTranslationMap])} {language === languageKey && '✓'}
+      <Text className={`text-center ${isSelected ? 'text-background font-bold' : 'text-foreground'}`}>
+        {tr(languageTranslationMap[language.code])} {isSelected && '✓'}
       </Text>
     </TouchableOpacity>
   );

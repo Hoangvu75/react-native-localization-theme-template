@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { View, Text, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useLanguage } from '../providers/language-provider';
+import { useLanguage } from '../providers/language-provider/language-provider';
 
 export default function TranslatingScreen() {
-  const { tr, translationProgress } = useLanguage();
-  const { targetLanguage, languageName } = useLocalSearchParams<{
-    targetLanguage: string;
-    languageName: string;
-  }>();  
+  const { tr, translationProgress, languages } = useLanguage();
+  const { languageCode } = useLocalSearchParams<{
+    languageCode: string;
+  }>();
+  
+  const targetLanguage = languages.find(lang => lang.code === languageCode);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(tr('connecting'));
   const [animatedProgress] = useState(new Animated.Value(0));
@@ -18,21 +19,24 @@ export default function TranslatingScreen() {
     Animated.timing(animatedProgress, {
       toValue: progress,
       duration: 300,
-      easing: Easing.out(Easing.quad),
+      easing: Easing.ease,
       useNativeDriver: false,
     }).start();
   }, [progress, animatedProgress]);
 
   useEffect(() => {
-    if (translationProgress && translationProgress.targetLanguage === targetLanguage) {
+    if (translationProgress && translationProgress.targetLanguage.code === languageCode) {
       setProgress(translationProgress.progress);
       setCurrentStep(translationProgress.step);
       
       if (translationProgress.progress >= 100) {
-        setTimeout(router.back, 1000);
+        setTimeout(() => {
+          setCurrentStep(tr('returningToHome'));
+          setTimeout(router.back, 500);
+        }, 1000);
       }
     }
-  }, [translationProgress, targetLanguage]);
+  }, [translationProgress, languageCode, tr]);
 
   const progressWidth = animatedProgress.interpolate({
     inputRange: [0, 100],
@@ -49,7 +53,7 @@ export default function TranslatingScreen() {
             {tr('translatingTo')}
           </Text>
           <Text className="text-primary text-xl font-semibold text-center mt-2">
-            {languageName}
+            {targetLanguage?.nativeName}
           </Text>
         </View>
 
@@ -61,51 +65,26 @@ export default function TranslatingScreen() {
             />
           </View>
           
-          <Text className="text-foreground text-lg font-semibold text-center mb-2">
-            {Math.round(progress)}%
-          </Text>
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-muted text-sm">
+              {tr('currentStep')}:
+            </Text>
+            <Text className="text-foreground text-sm font-medium">
+              {Math.round(progress)}%
+            </Text>
+          </View>
           
-          <Text className="text-muted text-base text-center">
+          <Text className="text-foreground text-center">
             {currentStep}
           </Text>
         </View>
 
-        <View className="flex-row justify-center items-center mt-4">
-          {[0, 1, 2].map((index) => (
-            <Animated.View
-              key={index}
-              className="w-2 h-2 bg-primary rounded-full mx-1"
-              style={{
-                opacity: animatedProgress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: [0.3, 1],
-                  extrapolate: 'clamp',
-                }),
-                transform: [
-                  {
-                    scale: animatedProgress.interpolate({
-                      inputRange: [0, 50, 100],
-                      outputRange: [1, 1.2, 1],
-                      extrapolate: 'clamp',
-                    }),
-                  },
-                ],
-              }}
-            />
-          ))}
+        <View className="mt-8">
+          <Text className="text-muted text-center text-sm">
+            {tr('preparingTranslation')}
+          </Text>
         </View>
-
-        {progress >= 100 && (
-          <View className="mt-8">
-            <Text className="text-accent text-lg font-semibold text-center">
-              {tr('translationComplete')}
-            </Text>
-            <Text className="text-muted text-sm text-center mt-2">
-              {tr('returningToHome')}
-            </Text>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
-}
+} 
